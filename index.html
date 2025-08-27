@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Conway's Game of Life</title>
+    <meta name="description" content="Conway's Game of Life - interactive web version" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Conway's Game of Life</h1>
+      <p class="tagline">Click or drag to toggle cells. Works on mobile too.</p>
+    </header>
+
+    <main class="layout">
+      <section class="board-section">
+        <canvas id="gameCanvas" aria-label="Game of Life board" role="img"></canvas>
+      </section>
+
+      <aside class="controls">
+        <div class="control-row">
+          <button id="playPauseBtn" class="primary">Start</button>
+          <button id="stepBtn">Step</button>
+          <button id="clearBtn">Clear</button>
+          <button id="randomBtn">Random</button>
+        </div>
+        <div class="control-row">
+          <label class="inline">
+            Speed
+            <input id="speedRange" type="range" min="1" max="60" value="10" />
+            <span id="speedLabel">10 fps</span>
+          </label>
+        </div>
+        <div class="control-row">
+          <label class="inline">
+            Cell Size
+            <input id="cellSizeRange" type="range" min="5" max="30" value="12" />
+            <span id="cellSizeLabel">12 px</span>
+          </label>
+        </div>
+        <div class="control-row options">
+          <label class="checkbox">
+            <input id="wrapToggle" type="checkbox" checked />
+            Wrap edges
+          </label>
+          <label class="checkbox">
+            <input id="gridToggle" type="checkbox" checked />
+            Show grid
+          </label>
+        </div>
+        <details class="about">
+          <summary>About</summary>
+          <p>
+            Conway's Game of Life is a cellular automaton where cells live, die, or are born based on their neighbors.
+          </p>
+          <ul>
+            <li>Play/Pause to run the simulation.</li>
+            <li>Step advances one generation.</li>
+            <li>Clear empties the board. Random seeds it.</li>
+            <li>Drag to paint. Right-click/Alt-drag to erase.</li>
+            <li>Pinch to zoom on mobile; use cell size slider on desktop.</li>
+          </ul>
+        </details>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" target="_blank" rel="noopener noreferrer">Learn more</a>
+      <span>·</span>
+      <a href="https://github.com/" target="_blank" rel="noopener noreferrer">View source</a>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+  </html>
+
+

@@ -1,0 +1,146 @@
+:root {
+  --bg: #0b1020;
+  --bg-soft: #121936;
+  --text: #e8edf7;
+  --muted: #b7c0d6;
+  --accent: #6ee7ff;
+  --accent-strong: #22d3ee;
+  --grid: rgba(255, 255, 255, 0.1);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg) 0%, #0d1530 100%);
+}
+
+.site-header {
+  padding: 20px 16px 8px;
+  text-align: center;
+}
+
+.site-header h1 {
+  margin: 0 0 6px 0;
+  font-size: 28px;
+  letter-spacing: 0.2px;
+}
+
+.site-header .tagline {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.board-section {
+  position: relative;
+  background: var(--bg-soft);
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 420px;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: clamp(360px, 60vh, 900px);
+  image-rendering: pixelated;
+  cursor: crosshair;
+}
+
+.controls {
+  background: var(--bg-soft);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: fit-content;
+}
+
+.control-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+button {
+  appearance: none;
+  border: 1px solid transparent;
+  background: #1e2a54;
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover { filter: brightness(1.05); }
+button:active { filter: brightness(0.95); }
+
+button.primary {
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+  color: #03131a;
+}
+
+label.inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+input[type="range"] {
+  accent-color: var(--accent-strong);
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+details.about {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.site-footer {
+  max-width: 1200px;
+  margin: 12px auto 24px;
+  padding: 0 16px;
+  display: flex;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.site-footer a { color: var(--accent); text-decoration: none; }
+.site-footer a:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+
