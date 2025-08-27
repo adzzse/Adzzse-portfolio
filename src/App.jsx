@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Home from './components/Home'
 import GameOfLife from './components/GameOfLife'
+import Highlife from './components/Highlife'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/game-of-life" element={<GameOfLife />} />
+          <Route path="/highlife" element={<Highlife />} />
         </Routes>
       </main>
     </div>

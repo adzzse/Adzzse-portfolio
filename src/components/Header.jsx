@@ -21,6 +21,12 @@ function Header() {
           >
             Game of Life
           </Link>
+          <Link 
+            to="/highlife" 
+            className={location.pathname === '/highlife' ? 'active' : ''}
+          >
+            Highlife
+          </Link>
         </nav>
       </div>
     </header>
