@@ -21,6 +21,10 @@ body {
   background: linear-gradient(180deg, var(--bg) 0%, #0d1530 100%);
 }
 
+.App {
+  min-height: 100vh;
+}
+
 .app-header {
   position: sticky;
   top: 0;
@@ -51,15 +55,24 @@ body {
   margin-left: 12px;
   padding: 6px 10px;
   border-radius: 8px;
+  transition: background-color 0.2s;
 }
-.app-nav a:hover { background: rgba(255,255,255,0.06); }
+
+.app-nav a:hover { 
+  background: rgba(255,255,255,0.06); 
+}
+
+.app-nav a.active {
+  background: rgba(110, 231, 255, 0.1);
+  color: var(--accent);
+}
 
 .site-header {
   padding: 20px 16px 8px;
   text-align: center;
 }
 
-.site-header h1 {
+.site-header h2 {
   margin: 0 0 6px 0;
   font-size: 28px;
   letter-spacing: 0.2px;
@@ -96,31 +109,6 @@ body {
   cursor: crosshair;
 }
 
-.route.hidden { display: none; }
-
-.home {
-  max-width: 1200px;
-  margin: 24px auto;
-  padding: 0 16px;
-}
-.home h2 { margin-top: 8px; }
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
-  margin-top: 16px;
-}
-.card {
-  display: block;
-  background: var(--bg-soft);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
-  padding: 16px;
-  text-decoration: none;
-  color: var(--text);
-}
-.card:hover { border-color: rgba(255,255,255,0.18); }
-
 .controls {
   background: var(--bg-soft);
   border-radius: 12px;
@@ -147,10 +135,16 @@ button {
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
+  transition: filter 0.2s;
 }
 
-button:hover { filter: brightness(1.05); }
-button:active { filter: brightness(0.95); }
+button:hover { 
+  filter: brightness(1.05); 
+}
+
+button:active { 
+  filter: brightness(0.95); 
+}
 
 button.primary {
   background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
@@ -192,13 +186,59 @@ details.about {
   color: var(--muted);
 }
 
-.site-footer a { color: var(--accent); text-decoration: none; }
-.site-footer a:hover { text-decoration: underline; }
+.site-footer a { 
+  color: var(--accent); 
+  text-decoration: none; 
+}
+
+.site-footer a:hover { 
+  text-decoration: underline; 
+}
+
+.home {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.home h2 { 
+  margin-top: 8px; 
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.card {
+  display: block;
+  background: var(--bg-soft);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 16px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+
+.card:hover { 
+  border-color: rgba(255,255,255,0.18); 
+}
 
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: 1fr;
   }
+  
+  .app-header-inner {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .app-nav a {
+    margin-left: 0;
+    margin-right: 8px;
+  }
 }
-
-
