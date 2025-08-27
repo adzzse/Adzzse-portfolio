@@ -21,6 +21,39 @@ body {
   background: linear-gradient(180deg, var(--bg) 0%, #0d1530 100%);
 }
 
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(11, 16, 32, 0.8);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.app-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.app-nav a {
+  color: var(--text);
+  text-decoration: none;
+  margin-left: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.app-nav a:hover { background: rgba(255,255,255,0.06); }
+
 .site-header {
   padding: 20px 16px 8px;
   text-align: center;
@@ -62,6 +95,31 @@ body {
   image-rendering: pixelated;
   cursor: crosshair;
 }
+
+.route.hidden { display: none; }
+
+.home {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+.home h2 { margin-top: 8px; }
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.card {
+  display: block;
+  background: var(--bg-soft);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 16px;
+  text-decoration: none;
+  color: var(--text);
+}
+.card:hover { border-color: rgba(255,255,255,0.18); }
 
 .controls {
   background: var(--bg-soft);
