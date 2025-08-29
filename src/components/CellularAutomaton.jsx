@@ -9,7 +9,13 @@ function CellularAutomaton({
   cellColor = '#6ee7ff',
   backgroundColor = '#0f1738',
   extraControls = null,
-  aboutContent = null
+  aboutContent = null,
+  stepFunction = null, // Custom step function for non-standard automata
+  initialState = null, // Custom initial state setup
+  customDraw = null, // Custom drawing function
+  cellStates = 2, // Number of possible cell states (default: 2 for binary)
+  customControls = null, // Additional custom controls
+  maxFps = 60 // Maximum FPS for the simulation
 }) {
   const canvasRef = useRef(null)
   const animationRef = useRef(null)
@@ -26,6 +32,9 @@ function CellularAutomaton({
   const [rows, setRows] = useState(0)
   const [grid, setGrid] = useState(new Uint8Array(0))
   const [next, setNext] = useState(new Uint8Array(0))
+  
+  // Custom state for automata that need additional data
+  const [customState, setCustomState] = useState({})
   
   const lastStepAt = useRef(0)
   
@@ -92,7 +101,7 @@ function CellularAutomaton({
       for (let y = 0; y < copyRows; y++) {
         for (let x = 0; x < copyCols; x++) {
           const oldIdx = y * oldCols + x
-          const newIdx = (y + rowOffset) * newCols + (x + colOffset)
+          const newIdx = (y + rowOffset) * newCols + (x + rowOffset)
           newGrid[newIdx] = oldGrid[oldIdx]
         }
       }
@@ -100,7 +109,15 @@ function CellularAutomaton({
     
     setGrid(newGrid)
     setNext(newNext)
-  }, [cols, rows, grid, cellSize])
+    
+    // Initialize custom state if provided
+    if (initialState) {
+      const newCustomState = initialState(newCols, newRows, newGrid)
+      if (newCustomState) {
+        setCustomState(newCustomState)
+      }
+    }
+  }, [cols, rows, grid, cellSize, initialState])
   
   // Update grid size when cell size changes
   useEffect(() => {
@@ -110,7 +127,7 @@ function CellularAutomaton({
   // Grid index helper
   const index = useCallback((x, y) => y * cols + x, [cols])
   
-  // Count neighbors
+  // Count neighbors (for standard cellular automata)
   const countNeighbors = useCallback((x, y) => {
     let count = 0
     for (let dy = -1; dy <= 1; dy++) {
@@ -135,8 +152,8 @@ function CellularAutomaton({
     return count
   }, [cols, rows, grid, wrapEdges, index])
   
-  // Game step with custom rules
-  const step = useCallback(() => {
+  // Default step function for Conway-style automata
+  const defaultStep = useCallback(() => {
     const newNext = new Uint8Array(cols * rows)
     
     for (let y = 0; y < rows; y++) {
@@ -161,8 +178,23 @@ function CellularAutomaton({
     setGrid(newNext)
   }, [cols, rows, grid, countNeighbors, index, birthRules, survivalRules])
   
-  // Draw function
-  const draw = useCallback(() => {
+  // Game step with custom rules or custom step function
+  const step = useCallback(() => {
+    if (stepFunction) {
+      // Use custom step function
+      const result = stepFunction(grid, cols, rows, customState, setCustomState, wrapEdges, index)
+      if (result && result.grid) {
+        setGrid(result.grid)
+        if (result.next) setNext(result.next)
+      }
+    } else if (birthRules && survivalRules) {
+      // Use default Conway-style rules
+      defaultStep()
+    }
+  }, [stepFunction, grid, cols, rows, customState, setCustomState, wrapEdges, index, birthRules, survivalRules, defaultStep])
+  
+  // Default draw function
+  const defaultDraw = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !ctx.current) return
     
@@ -173,13 +205,24 @@ function CellularAutomaton({
     ctx.current.fillStyle = backgroundColor
     ctx.current.fillRect(0, 0, width, height)
     
-    ctx.current.fillStyle = cellColor
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        if (grid[index(x, y)] === 1) {
-          ctx.current.fillRect(x * cellSize, y * cellSize, cellSize, cellSize)
+    // Only draw if there are live cells
+    const hasLiveCells = grid.some(cell => cell === 1)
+    if (hasLiveCells) {
+      ctx.current.fillStyle = cellColor
+      
+      // Batch drawing operations
+      ctx.current.beginPath()
+      for (let y = 0; y < rows; y++) {
+        const rowStart = y * cols
+        for (let x = 0; x < cols; x++) {
+          if (grid[rowStart + x] === 1) {
+            const cellX = x * cellSize
+            const cellY = y * cellSize
+            ctx.current.rect(cellX, cellY, cellSize, cellSize)
+          }
         }
       }
+      ctx.current.fill()
     }
     
     if (showGrid && cellSize >= 8) {
@@ -201,7 +244,16 @@ function CellularAutomaton({
       
       ctx.current.stroke()
     }
-  }, [grid, cols, rows, cellSize, showGrid, index, backgroundColor, cellColor])
+  }, [grid, cols, rows, cellSize, showGrid, backgroundColor, cellColor])
+  
+  // Draw function - use custom or default
+  const draw = useCallback(() => {
+    if (customDraw) {
+      customDraw(ctx.current, canvasRef.current, grid, cols, rows, cellSize, showGrid, index, customState)
+    } else {
+      defaultDraw()
+    }
+  }, [customDraw, defaultDraw, grid, cols, rows, cellSize, showGrid, index, customState])
   
   // Animation loop
   const animate = useCallback((timestamp) => {
@@ -351,7 +403,18 @@ function CellularAutomaton({
   // Control handlers
   const handlePlayPause = () => setIsPlaying(!isPlaying)
   const handleStep = () => { if (!isPlaying) step() }
-  const handleClear = () => setGrid(new Uint8Array(cols * rows))
+  const handleClear = () => {
+    const newGrid = new Uint8Array(cols * rows)
+    setGrid(newGrid)
+    
+    // Reset custom state if initialState is provided
+    if (initialState) {
+      const newCustomState = initialState(cols, rows, newGrid)
+      if (newCustomState) {
+        setCustomState(newCustomState)
+      }
+    }
+  }
   const handleRandom = () => {
     const newGrid = new Uint8Array(cols * rows)
     for (let i = 0; i < newGrid.length; i++) {
@@ -392,8 +455,17 @@ function CellularAutomaton({
           {extraControls && (
             <div className="control-row">
               {typeof extraControls === 'function' 
-                ? extraControls({ setGrid, cols, rows, grid })
+                ? extraControls({ setGrid, cols, rows, grid, customState, setCustomState })
                 : extraControls
+              }
+            </div>
+          )}
+          
+          {customControls && (
+            <div className="control-row">
+              {typeof customControls === 'function' 
+                ? customControls({ setGrid, cols, rows, grid, customState, setCustomState })
+                : customControls
               }
             </div>
           )}
@@ -404,7 +476,7 @@ function CellularAutomaton({
               <input 
                 type="range" 
                 min="1" 
-                max="60" 
+                max={maxFps} 
                 value={fps} 
                 onChange={(e) => setFps(parseInt(e.target.value))}
               />
@@ -427,21 +499,29 @@ function CellularAutomaton({
           </div>
           
           <div className="control-row options">
-            <label className="checkbox">
-              <input 
-                type="checkbox" 
-                checked={wrapEdges} 
-                onChange={(e) => setWrapEdges(e.target.checked)}
-              />
-              Wrap edges
+            <label className="switch-label">
+              <span className="switch-text">Wrap edges</span>
+              <div className="switch-container">
+                <input 
+                  type="checkbox" 
+                  checked={wrapEdges} 
+                  onChange={(e) => setWrapEdges(e.target.checked)}
+                  className="switch-input"
+                />
+                <span className="switch-slider"></span>
+              </div>
             </label>
-            <label className="checkbox">
-              <input 
-                type="checkbox" 
-                checked={showGrid} 
-                onChange={(e) => setShowGrid(e.target.checked)}
-              />
-              Show grid
+            <label className="switch-label">
+              <span className="switch-text">Show grid</span>
+              <div className="switch-container">
+                <input 
+                  type="checkbox" 
+                  checked={showGrid} 
+                  onChange={(e) => setShowGrid(e.target.checked)}
+                  className="switch-input"
+                />
+                <span className="switch-slider"></span>
+              </div>
             </label>
           </div>
           
@@ -459,7 +539,7 @@ function CellularAutomaton({
           Learn more
         </a>
         <span>·</span>
-        <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/adzzse/Adzzse-portfolio" target="_blank" rel="noopener noreferrer">
           View source
         </a>
       </footer>

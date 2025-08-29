@@ -7,7 +7,9 @@ function Header() {
   return (
     <header className="app-header">
       <div className="app-header-inner">
-        <h1 className="app-title">Adzzse Portfolio</h1>
+        <Link to="/" className="app-title-link">
+          <h1 className="app-title">Adzzse Portfolio</h1>
+        </Link>
         <nav className="app-nav" aria-label="Primary">
           <Link 
             to="/" 
@@ -16,8 +18,8 @@ function Header() {
             Home
           </Link>
           <Link 
-            to="/game-of-life" 
-            className={location.pathname === '/game-of-life' ? 'active' : ''}
+            to="/gameoflife" 
+            className={location.pathname === '/gameoflife' ? 'active' : ''}
           >
             Game of Life
           </Link>
@@ -26,6 +28,18 @@ function Header() {
             className={location.pathname === '/highlife' ? 'active' : ''}
           >
             Highlife
+          </Link>
+          <Link 
+            to="/langtonsant" 
+            className={location.pathname === '/langtonsant' ? 'active' : ''}
+          >
+            Langton's Ant
+          </Link>
+          <Link 
+            to="/rule30" 
+            className={location.pathname === '/rule30' ? 'active' : ''}
+          >
+            Rule 30
           </Link>
         </nav>
       </div>
