@@ -32,6 +32,10 @@ function Home() {
       <div className="category">
         <h3 className="category-title">Web App</h3>
         <div className="cards">
+          <Link className="card" to="/calculator">
+            <h3>Calculator →</h3>
+            <p>It's a calculator, what did you expect?</p>
+          </Link>
           <div className="card coming-soon">
             <h3>Coming Soon</h3>
             <p>Coming Soon</p>

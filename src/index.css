@@ -238,11 +238,11 @@ body {
 .app-header-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
 }
 
 .app-title {
@@ -275,6 +275,124 @@ body {
 
 .app-nav a.active {
   background: rgba(110, 231, 255, 0.1);
+  color: var(--accent);
+}
+
+.app-nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: transparent;
+}
+
+/* Ensure dropdown doesn't go off-screen on the right */
+.nav-dropdown:last-child .nav-dropdown-menu {
+  right: 0;
+  left: auto;
+}
+
+.nav-dropdown-toggle {
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  position: relative;
+  z-index: 101;
+}
+
+.nav-dropdown-toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-dropdown-toggle.active {
+  background: rgba(110, 231, 255, 0.1);
+  color: var(--accent);
+  border-color: rgba(110, 231, 255, 0.3);
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.nav-dropdown-toggle.active .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: var(--bg-soft);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2px 0;
+  min-width: 200px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+  z-index: 100;
+  margin-top: 0;
+  overflow: hidden;
+}
+
+.nav-dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.nav-dropdown-menu a {
+  display: block;
+  padding: 8px 12px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border-radius: 0;
+  margin: 2px 4px;
+  border: none;
+  position: relative;
+  width: calc(100% - 8px);
+  box-sizing: border-box;
+}
+
+
+
+
+
+
+.nav-dropdown-menu a:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-dropdown-menu a.active {
+  background: rgba(110, 231, 255, 0.15);
   color: var(--accent);
 }
 
@@ -637,8 +755,160 @@ details.about:hover {
     gap: 8px;
   }
   
-  .app-nav a {
-    margin-left: 0;
-    margin-right: 8px;
+  .app-nav {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .nav-dropdown {
+    width: 100%;
+  }
+  
+  .nav-dropdown-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .nav-dropdown-menu {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 4px;
+    width: 100%;
+    min-width: auto;
+    padding: 4px;
+  }
+  
+  .nav-dropdown-menu.show {
+    transform: none;
+  }
+}
+
+/* Calculator Styles */
+.calculator-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.calculator {
+  background: var(--bg-soft);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 320px;
+  width: 100%;
+}
+
+.calculator-display {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: right;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.calculator-expression {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  min-height: 20px;
+}
+
+.calculator-result {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+
+.calculator-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.calc-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 16px 8px;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.calc-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.calc-btn:active {
+  transform: translateY(0);
+}
+
+.calc-btn-function {
+  background: rgba(110, 231, 255, 0.1);
+  color: var(--accent);
+  border-color: rgba(110, 231, 255, 0.3);
+}
+
+.calc-btn-function:hover {
+  background: rgba(110, 231, 255, 0.2);
+}
+
+.calc-btn-operator {
+  background: rgba(110, 231, 255, 0.15);
+  color: var(--accent-strong);
+  border-color: rgba(110, 231, 255, 0.4);
+}
+
+.calc-btn-operator:hover {
+  background: rgba(110, 231, 255, 0.25);
+}
+
+.calc-btn-number {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.calc-btn-zero {
+  grid-column: span 2;
+}
+
+@media (max-width: 480px) {
+  .calculator {
+    padding: 16px;
+    max-width: 280px;
+  }
+  
+  .calculator-buttons {
+    gap: 8px;
+  }
+  
+  .calc-btn {
+    padding: 12px 6px;
+    font-size: 16px;
+  }
+  
+  .calculator-result {
+    font-size: 28px;
   }
 }

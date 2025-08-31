@@ -7,6 +7,7 @@ import Highlife from './components/Highlife'
 // import Weather from './components/Weather'
 import LangtonsAnt from './components/LangtonsAnt'
 import Rule30 from './components/Rule30'
+import Calculator from './components/Calculator'
 import FogBackground from './components/FogBackground'
 
 // Memoized components for better performance
@@ -22,7 +23,7 @@ function App() {
       <Route path="/highlife" element={<Highlife />} />
       <Route path="/langtonsant" element={<LangtonsAnt />} />
       <Route path="/rule30" element={<Rule30 />} />
-      {/* <Route path="/weather" element={<Weather />} /> */}
+      <Route path="/calculator" element={<Calculator />} />
     </Routes>
   ), [])
 
