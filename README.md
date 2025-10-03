@@ -16,6 +16,13 @@ Deploy: https://adzzse.github.io/Adzzse-portfolio/
   - Optional grid overlay
   - Click or drag to paint; Right-click/Alt-drag to erase
   - Responsive canvas, touch support
+- **Pathfinding** - Interactive grid pathfinding with:
+  - Dijkstra, A*, Greedy Best-First
+  - Start/Pause, Step, Reset, Clear Walls
+  - Speed (FPS) and Cell Size controls
+  - Shift-click to set Start, Ctrl-click to set End, drag to draw walls
+  - Optional distances and direction arrows (both OFF by default)
+  - Smooth path reveal, responsive canvas
 - **Responsive design** with mobile-first approach
 - **Vite** for fast development and building
 - **GitHub Pages** ready
@@ -83,7 +90,12 @@ src/
 ├── components/
 │   ├── Header.jsx          # Navigation header
 │   ├── Home.jsx            # Home page component
-│   └── GameOfLife.jsx      # Conway's Game of Life
+│   ├── GameOfLife.jsx      # Conway's Game of Life
+│   ├── Pathfinding.jsx     # Pathfinding visualization
+│   ├── CellularAutomaton.jsx # Reusable automaton base
+│   ├── LangtonsAnt.jsx     # Langton's Ant demo
+│   ├── Highlife.jsx        # Highlife automaton
+│   └── Rule30.jsx          # 1D cellular automaton
 ├── App.jsx                 # Main app with routing
 ├── main.jsx                # React entry point
 └── index.css               # Global styles
@@ -108,6 +120,25 @@ src/
 - **Cell Size**: Change grid resolution (5-30px)
 - **Wrap Edges**: Enable/disable edge wrapping
 - **Show Grid**: Toggle grid overlay
+
+## Pathfinding Controls
+
+- **Start/Pause**: Run or pause the search
+- **Step**: Advance one expansion step while paused
+- **Reset**: Clear search state only
+- **Clear Walls**: Remove all obstacles
+- **Algorithm**: Choose Dijkstra, A*, or Greedy Best-First
+- **Speed**: Adjust search speed (1-240 FPS)
+- **Cell Size**: Change grid resolution (8-32px)
+- **Toggles**:
+  - Distances (g-scores) text: OFF by default
+  - Direction arrows along revealed path: OFF by default
+- **Tips**: Shift-click sets Start, Ctrl-click sets End. Drag to draw walls. Drag can also move Start/End.
+
+### Pathfinding Performance
+
+- Uses a binary min-heap for the open set (O(log n) push/pop)
+- Precomputes path position/next maps to avoid per-frame allocations
 
 ## Development
 

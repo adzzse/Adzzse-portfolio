@@ -16,8 +16,8 @@ function Pathfinding() {
   const [algo, setAlgo] = useState('dijkstra')
   const [speed, setSpeed] = useState(60)
   const [isRunning, setIsRunning] = useState(false)
-  const [showDistances, setShowDistances] = useState(true)
-  const [showDirections, setShowDirections] = useState(true)
+  const [showDistances, setShowDistances] = useState(false)
+  const [showDirections, setShowDirections] = useState(false)
 
   // Cells: 0 empty, 1 wall
   const [grid, setGrid] = useState(new Uint8Array(0))

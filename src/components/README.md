@@ -156,6 +156,27 @@ See the existing components for examples:
 - `Highlife.jsx` - Conway-style with custom controls
 - `LangtonsAnt.jsx` - Complex automaton with custom logic
 - `Rule30.jsx` - 1D cellular automaton
+ - `Pathfinding.jsx` - Dijkstra/A*/Greedy pathfinding visualization
+
+## Pathfinding Component
+
+The `Pathfinding` component provides an interactive grid to visualize Dijkstra, A*, and Greedy Best-First search.
+
+### Controls
+
+- Start/Pause, Step, Reset
+- Clear Walls
+- Algorithm: Dijkstra, A*, Greedy Best-First
+- Speed (1-240 FPS)
+- Cell Size (8-32px)
+- Show distances (g-scores) [default: OFF]
+- Show directions (arrows along revealed path) [default: OFF]
+- Tips: Shift-click sets Start, Ctrl-click sets End. Drag to draw walls. Drag can also move Start/End.
+
+### Performance Notes
+
+- Open set uses a binary min-heap for O(log n) operations
+- Path position/next maps are precomputed to avoid per-frame Set/Map allocations
 
 ## Tips
 
