@@ -74,6 +74,13 @@ function Header() {
               >
                 Rule 30
               </Link>
+              <Link 
+                to="/pathfinding" 
+                className={isActive('/pathfinding') ? 'active' : ''}
+                onClick={closeDropdown}
+              >
+                Pathfinding
+              </Link>
             </div>
           </div>
           

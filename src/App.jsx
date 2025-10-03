@@ -9,6 +9,7 @@ import LangtonsAnt from './components/LangtonsAnt'
 import Rule30 from './components/Rule30'
 import Calculator from './components/Calculator'
 import FogBackground from './components/FogBackground'
+import Pathfinding from './components/Pathfinding'
 
 // Memoized components for better performance
 const MemoizedHeader = React.memo(Header)
@@ -24,6 +25,7 @@ function App() {
       <Route path="/langtonsant" element={<LangtonsAnt />} />
       <Route path="/rule30" element={<Rule30 />} />
       <Route path="/calculator" element={<Calculator />} />
+      <Route path="/pathfinding" element={<Pathfinding />} />
     </Routes>
   ), [])
 

@@ -1,4 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
+import { pointerToCellFromEvent, resizeCanvasToDpr, computeGridSize, drawGridLines } from '../lib/grid'
+import GridLayout from './GridLayout'
 
 function CellularAutomaton({ 
   title, 
@@ -15,7 +17,7 @@ function CellularAutomaton({
   customDraw = null, // Custom drawing function
   cellStates = 2, // Number of possible cell states (default: 2 for binary)
   customControls = null, // Additional custom controls
-  maxFps = 60 // Maximum FPS for the simulation
+  maxFps = 120 // Maximum FPS for the simulation
 }) {
   const canvasRef = useRef(null)
   const animationRef = useRef(null)
@@ -40,6 +42,10 @@ function CellularAutomaton({
   
   // Canvas context
   const ctx = useRef(null)
+  // Visual effect state (timestamps for recently changed cells)
+  const recentChangedAtRef = useRef(new Float64Array(0))
+  const visualAnimationRef = useRef(null)
+  const [hoverCell, setHoverCell] = useState(null)
   
   // Initialize canvas
   useEffect(() => {
@@ -54,19 +60,7 @@ function CellularAutomaton({
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !ctx.current) return
-    
-    const dpr = window.devicePixelRatio || 1
-    const cssWidth = canvas.clientWidth
-    const cssHeight = canvas.clientHeight
-    const displayWidth = Math.floor(cssWidth * dpr)
-    const displayHeight = Math.floor(cssHeight * dpr)
-    
-    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-      canvas.width = displayWidth
-      canvas.height = displayHeight
-      ctx.current.setTransform(dpr, 0, 0, dpr, 0, 0)
-      recomputeGridSize()
-    }
+    resizeCanvasToDpr(canvas, ctx, recomputeGridSize)
   }, [])
   
   // Grid size computation - exactly like the working code
@@ -74,10 +68,7 @@ function CellularAutomaton({
     const canvas = canvasRef.current
     if (!canvas) return
     
-    const width = canvas.clientWidth
-    const height = canvas.clientHeight
-    const newCols = Math.max(1, Math.floor(width / cellSize))
-    const newRows = Math.max(1, Math.floor(height / cellSize))
+    const { cols: newCols, rows: newRows } = computeGridSize(canvas, cellSize)
     
     if (newCols === cols && newRows === rows) return
     
@@ -88,8 +79,10 @@ function CellularAutomaton({
     setCols(newCols)
     setRows(newRows)
     
-    const newGrid = new Uint8Array(newCols * newRows)
-    const newNext = new Uint8Array(newCols * newRows)
+    const newSize = newCols * newRows
+    const newGrid = new Uint8Array(newSize)
+    const newNext = new Uint8Array(newSize)
+    const newRecent = new Float64Array(newSize)
     
     // Preserve old content centered if possible
     if (oldCols > 0 && oldRows > 0) {
@@ -101,7 +94,7 @@ function CellularAutomaton({
       for (let y = 0; y < copyRows; y++) {
         for (let x = 0; x < copyCols; x++) {
           const oldIdx = y * oldCols + x
-          const newIdx = (y + rowOffset) * newCols + (x + rowOffset)
+          const newIdx = (y + rowOffset) * newCols + (x + colOffset)
           newGrid[newIdx] = oldGrid[oldIdx]
         }
       }
@@ -109,6 +102,7 @@ function CellularAutomaton({
     
     setGrid(newGrid)
     setNext(newNext)
+    recentChangedAtRef.current = newRecent
     
     // Initialize custom state if provided
     if (initialState) {
@@ -155,6 +149,7 @@ function CellularAutomaton({
   // Default step function for Conway-style automata
   const defaultStep = useCallback(() => {
     const newNext = new Uint8Array(cols * rows)
+    let anyChanged = false
     
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
@@ -164,13 +159,15 @@ function CellularAutomaton({
         let newState = 0
         
         if (alive) {
-          // Survival: check if neighbors count is in survival rules
           newState = survivalRules.includes(neighbors) ? 1 : 0
         } else {
-          // Birth: check if neighbors count is in birth rules
           newState = birthRules.includes(neighbors) ? 1 : 0
         }
         newNext[i] = newState
+        if (newState !== grid[i]) {
+          anyChanged = true
+          recentChangedAtRef.current[i] = performance.now()
+        }
       }
     }
     
@@ -200,49 +197,71 @@ function CellularAutomaton({
     
     const width = canvas.clientWidth
     const height = canvas.clientHeight
+    const now = performance.now()
     
     ctx.current.clearRect(0, 0, width, height)
     ctx.current.fillStyle = backgroundColor
     ctx.current.fillRect(0, 0, width, height)
     
-    // Only draw if there are live cells
-    const hasLiveCells = grid.some(cell => cell === 1)
-    if (hasLiveCells) {
-      ctx.current.fillStyle = cellColor
-      
-      // Batch drawing operations
-      ctx.current.beginPath()
+    // Draw live cells with fade-in for recent changes
+    ctx.current.save()
+    for (let y = 0; y < rows; y++) {
+      const rowStart = y * cols
+      for (let x = 0; x < cols; x++) {
+        if (grid[rowStart + x] === 1) {
+          const cellX = x * cellSize
+          const cellY = y * cellSize
+          const changedAt = recentChangedAtRef.current[rowStart + x] || 0
+          const dt = now - changedAt
+          const FADE_MS = 300
+          let alpha = 1
+          if (dt > 0 && dt < FADE_MS) {
+            alpha = 0.2 + 0.8 * (dt / FADE_MS)
+          }
+          ctx.current.globalAlpha = alpha
+          ctx.current.fillStyle = cellColor
+          ctx.current.fillRect(cellX, cellY, cellSize, cellSize)
+        }
+      }
+    }
+    ctx.current.restore()
+    
+    // Recently changed highlight overlay (fade out)
+    {
+      const HIGHLIGHT_MS = 600
+      ctx.current.save()
       for (let y = 0; y < rows; y++) {
         const rowStart = y * cols
         for (let x = 0; x < cols; x++) {
-          if (grid[rowStart + x] === 1) {
-            const cellX = x * cellSize
-            const cellY = y * cellSize
-            ctx.current.rect(cellX, cellY, cellSize, cellSize)
+          const i = rowStart + x
+          const changedAt = recentChangedAtRef.current[i] || 0
+          const dt = now - changedAt
+          if (dt > 0 && dt < HIGHLIGHT_MS) {
+            const t = 1 - dt / HIGHLIGHT_MS
+            // Green overlay, fading out
+            ctx.current.globalAlpha = Math.max(0, Math.min(1, t)) * 0.8
+            ctx.current.fillStyle = '#a3e635'
+            ctx.current.fillRect(x * cellSize, y * cellSize, cellSize, cellSize)
           }
         }
       }
-      ctx.current.fill()
+      ctx.current.restore()
     }
     
     if (showGrid && cellSize >= 8) {
-      ctx.current.strokeStyle = 'rgba(255,255,255,0.08)'
-      ctx.current.lineWidth = 1
-      ctx.current.beginPath()
-      
-      for (let x = 0; x <= cols; x++) {
-        const gx = x * cellSize + 0.5
-        ctx.current.moveTo(gx, 0)
-        ctx.current.lineTo(gx, rows * cellSize)
-      }
-      
-      for (let y = 0; y <= rows; y++) {
-        const gy = y * cellSize + 0.5
-        ctx.current.moveTo(0, gy)
-        ctx.current.lineTo(cols * cellSize, gy)
-      }
-      
-      ctx.current.stroke()
+      drawGridLines(ctx.current, cols, rows, cellSize)
+    }
+
+    // Hover cell selection pulse
+    if (hoverCell && hoverCell.x >= 0 && hoverCell.x < cols && hoverCell.y >= 0 && hoverCell.y < rows) {
+      const pulse = 0.5 + 0.5 * Math.sin(now / 200)
+      const x = hoverCell.x * cellSize
+      const y = hoverCell.y * cellSize
+      ctx.current.save()
+      ctx.current.strokeStyle = `rgba(34, 211, 238, ${0.3 + 0.5 * pulse})`
+      ctx.current.lineWidth = Math.max(1, Math.min(3, cellSize * 0.15 + pulse))
+      ctx.current.strokeRect(x + 0.5, y + 0.5, cellSize - 1, cellSize - 1)
+      ctx.current.restore()
     }
   }, [grid, cols, rows, cellSize, showGrid, backgroundColor, cellColor])
   
@@ -267,6 +286,13 @@ function CellularAutomaton({
     
     animationRef.current = requestAnimationFrame(animate)
   }, [isPlaying, fps, step])
+
+  // Visual animation loop (always on) to support hover pulse and fade-outs
+  const visualAnimate = useCallback(() => {
+    // Redraw every frame for visual effects
+    draw()
+    visualAnimationRef.current = requestAnimationFrame(visualAnimate)
+  }, [draw])
   
   // Start/stop animation
   useEffect(() => {
@@ -284,6 +310,14 @@ function CellularAutomaton({
       }
     }
   }, [isPlaying, animate])
+
+  // Start/stop the visual RAF independent of simulation playing state
+  useEffect(() => {
+    visualAnimationRef.current = requestAnimationFrame(visualAnimate)
+    return () => {
+      if (visualAnimationRef.current) cancelAnimationFrame(visualAnimationRef.current)
+    }
+  }, [visualAnimate])
   
   // Redraw when needed
   useEffect(() => {
@@ -310,21 +344,18 @@ function CellularAutomaton({
   const [paintValue, setPaintValue] = useState(1)
   
   const pointerToCell = useCallback((evt) => {
-    const canvas = canvasRef.current
-    if (!canvas) return null
-    
-    const rect = canvas.getBoundingClientRect()
-    const x = Math.floor(((evt.clientX - rect.left) / rect.width) * canvas.clientWidth / cellSize)
-    const y = Math.floor(((evt.clientY - rect.top) / rect.height) * canvas.clientHeight / cellSize)
-    
-    if (x < 0 || x >= cols || y < 0 || y >= rows) return null
-    return { x, y }
+    return pointerToCellFromEvent(evt, canvasRef.current, cellSize, cols, rows)
   }, [cols, rows, cellSize])
   
   const setCell = useCallback((x, y, value) => {
     setGrid(prev => {
+      const i = index(x, y)
       const newGrid = new Uint8Array(prev)
-      newGrid[index(x, y)] = value
+      if (newGrid[i] !== value) {
+        newGrid[i] = value
+        // mark recently changed
+        recentChangedAtRef.current[i] = performance.now()
+      }
       return newGrid
     })
   }, [index])
@@ -341,13 +372,14 @@ function CellularAutomaton({
   }, [pointerToCell, setCell, paintValue])
   
   const handlePointerMove = useCallback((evt) => {
-    if (!isPointerDown) return
-    
     const cell = pointerToCell(evt)
+    setHoverCell(cell)
+    draw()
+    if (!isPointerDown) return
     if (cell) {
       setCell(cell.x, cell.y, paintValue)
     }
-  }, [isPointerDown, pointerToCell, setCell, paintValue])
+  }, [isPointerDown, pointerToCell, setCell, paintValue, draw])
   
   const handlePointerUp = useCallback(() => {
     setIsPointerDown(false)
@@ -360,6 +392,8 @@ function CellularAutomaton({
     
     canvas.addEventListener('mousedown', handlePointerDown)
     canvas.addEventListener('mousemove', handlePointerMove)
+    canvas.addEventListener('mouseenter', (e) => { setHoverCell(pointerToCell(e)); draw() })
+    canvas.addEventListener('mouseleave', () => { setHoverCell(null); draw() })
     canvas.addEventListener('contextmenu', (e) => e.preventDefault())
     
     window.addEventListener('mouseup', handlePointerUp)
@@ -367,6 +401,8 @@ function CellularAutomaton({
     return () => {
       canvas.removeEventListener('mousedown', handlePointerDown)
       canvas.removeEventListener('mousemove', handlePointerMove)
+      canvas.removeEventListener('mouseenter', (e) => { setHoverCell(pointerToCell(e)); draw() })
+      canvas.removeEventListener('mouseleave', () => { setHoverCell(null); draw() })
       canvas.removeEventListener('contextmenu', (e) => e.preventDefault())
       window.removeEventListener('mouseup', handlePointerUp)
     }
@@ -421,129 +457,130 @@ function CellularAutomaton({
       newGrid[i] = Math.random() < 0.3 ? 1 : 0
     }
     setGrid(newGrid)
+    // mark all initialized cells as changed to show overlay
+    const now = performance.now()
+    if (recentChangedAtRef.current.length !== newGrid.length) {
+      recentChangedAtRef.current = new Float64Array(newGrid.length)
+    }
+    for (let i = 0; i < newGrid.length; i++) {
+      if (newGrid[i] === 1) recentChangedAtRef.current[i] = now
+    }
   }
   
-  return (
-    <div className="cellular-automaton">
-      <header className="site-header">
-        <h2>{title}</h2>
-        <p className="tagline">{tagline}</p>
-      </header>
-      
-      <div className="layout">
-        <section className="board-section">
-          <canvas 
-            ref={canvasRef}
-            aria-label={`${title} board`}
-            role="img"
-          />
-        </section>
-        
-        <aside className="controls">
-          <div className="control-row main-controls">
-            <button 
-              onClick={handlePlayPause} 
-              className="primary"
-            >
-              {isPlaying ? 'Pause' : 'Start'}
-            </button>
-            <button onClick={handleStep}>Step</button>
-            <button onClick={handleClear}>Clear</button>
-            <button onClick={handleRandom}>Random</button>
-          </div>
-          
-          {extraControls && (
-            <div className="control-row">
-              {typeof extraControls === 'function' 
-                ? extraControls({ setGrid, cols, rows, grid, customState, setCustomState })
-                : extraControls
-              }
-            </div>
-          )}
-          
-          {customControls && (
-            <div className="control-row">
-              {typeof customControls === 'function' 
-                ? customControls({ setGrid, cols, rows, grid, customState, setCustomState })
-                : customControls
-              }
-            </div>
-          )}
-          
-          <div className="control-row">
-            <label className="inline">
-              Speed
-              <input 
-                type="range" 
-                min="1" 
-                max={maxFps} 
-                value={fps} 
-                onChange={(e) => setFps(parseInt(e.target.value))}
-              />
-              <span>{fps} fps</span>
-            </label>
-          </div>
-          
-          <div className="control-row">
-            <label className="inline">
-              Cell Size
-              <input 
-                type="range" 
-                min="5" 
-                max="30" 
-                value={cellSize} 
-                onChange={(e) => setCellSize(parseInt(e.target.value))}
-              />
-              <span>{cellSize} px</span>
-            </label>
-          </div>
-          
-          <div className="control-row options">
-            <label className="switch-label">
-              <span className="switch-text">Wrap edges</span>
-              <div className="switch-container">
-                <input 
-                  type="checkbox" 
-                  checked={wrapEdges} 
-                  onChange={(e) => setWrapEdges(e.target.checked)}
-                  className="switch-input"
-                />
-                <span className="switch-slider"></span>
-              </div>
-            </label>
-            <label className="switch-label">
-              <span className="switch-text">Show grid</span>
-              <div className="switch-container">
-                <input 
-                  type="checkbox" 
-                  checked={showGrid} 
-                  onChange={(e) => setShowGrid(e.target.checked)}
-                  className="switch-input"
-                />
-                <span className="switch-slider"></span>
-              </div>
-            </label>
-          </div>
-          
-          {aboutContent && (
-            <details className="about">
-              <summary>About {title}</summary>
-              {aboutContent}
-            </details>
-          )}
-        </aside>
+  const controls = (
+    <>
+      <div className="control-row main-controls">
+        <button 
+          onClick={handlePlayPause} 
+          className="primary"
+        >
+          {isPlaying ? 'Pause' : 'Start'}
+        </button>
+        <button onClick={handleStep}>Step</button>
+        <button onClick={handleClear}>Clear</button>
+        <button onClick={handleRandom}>Random</button>
       </div>
-      
-      <footer className="site-footer">
-        <a href={rules} target="_blank" rel="noopener noreferrer">
-          Learn more
-        </a>
-        <span>·</span>
-        <a href="https://github.com/adzzse/Adzzse-portfolio" target="_blank" rel="noopener noreferrer">
-          View source
-        </a>
-      </footer>
-    </div>
+      {extraControls && (
+        <div className="control-row">
+          {typeof extraControls === 'function' 
+            ? extraControls({ setGrid, cols, rows, grid, customState, setCustomState })
+            : extraControls}
+        </div>
+      )}
+      {customControls && (
+        <div className="control-row">
+          {typeof customControls === 'function' 
+            ? customControls({ setGrid, cols, rows, grid, customState, setCustomState })
+            : customControls}
+        </div>
+      )}
+      <div className="control-row">
+        <label className="inline">
+          Speed
+          <input 
+            type="range" 
+            min="1" 
+            max={maxFps} 
+            value={fps} 
+            onChange={(e) => setFps(parseInt(e.target.value))}
+            onWheel={(e) => {
+              e.preventDefault()
+              const delta = e.deltaY > 0 ? -1 : 1
+              setFps(prev => Math.max(1, Math.min(maxFps, prev + delta)))
+            }}
+          />
+          <span>{fps} fps</span>
+        </label>
+      </div>
+      <div className="control-row">
+        <label className="inline">
+          Cell Size
+          <input 
+            type="range" 
+            min="5" 
+            max="30" 
+            value={cellSize} 
+            onChange={(e) => setCellSize(parseInt(e.target.value))}
+            onWheel={(e) => {
+              e.preventDefault()
+              const delta = e.deltaY > 0 ? -1 : 1
+              setCellSize(prev => Math.max(5, Math.min(30, prev + delta)))
+            }}
+          />
+          <span>{cellSize} px</span>
+        </label>
+      </div>
+      <div className="control-row options">
+        <label className="switch-label">
+          <span className="switch-text">Wrap edges</span>
+          <div className="switch-container">
+            <input 
+              type="checkbox" 
+              checked={wrapEdges} 
+              onChange={(e) => setWrapEdges(e.target.checked)}
+              className="switch-input"
+            />
+            <span className="switch-slider"></span>
+          </div>
+        </label>
+        <label className="switch-label">
+          <span className="switch-text">Show grid</span>
+          <div className="switch-container">
+            <input 
+              type="checkbox" 
+              checked={showGrid} 
+              onChange={(e) => setShowGrid(e.target.checked)}
+              className="switch-input"
+            />
+            <span className="switch-slider"></span>
+          </div>
+        </label>
+      </div>
+      {aboutContent && (
+        <details className="about">
+          <summary>About {title}</summary>
+          {aboutContent}
+        </details>
+      )}
+    </>
+  )
+
+  const footerLinks = (
+    <>
+      <a href={rules} target="_blank" rel="noopener noreferrer">Learn more</a>
+      <span>·</span>
+      <a href="https://github.com/adzzse/Adzzse-portfolio" target="_blank" rel="noopener noreferrer">View source</a>
+    </>
+  )
+
+  return (
+    <GridLayout 
+      title={title}
+      tagline={tagline}
+      canvasRef={canvasRef}
+      controls={controls}
+      footerLinks={footerLinks}
+    />
   )
 }
 
