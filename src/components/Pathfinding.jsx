@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { resizeCanvasToDpr, computeGridSize, pointerToCellFromEvent, drawGridLines, drawArrow, drawCenteredText, computeFadeAlpha, get4Neighbors } from '../lib/grid'
+import { MinHeap } from '../lib/algorithms/heap'
 import GridLayout from './GridLayout'
 
 function Pathfinding() {
@@ -25,7 +26,7 @@ function Pathfinding() {
   const [end, setEnd] = useState({ x: 25, y: 15 })
 
   // Search state
-  const openRef = useRef([]) // {x,y,g,f}
+  const openRef = useRef(new MinHeap((n) => n.f)) // {x,y,g,f}
   const visitedRef = useRef(new Uint8Array(0))
   const visitedAtRef = useRef(new Float64Array(0))
   const prevRef = useRef(new Int32Array(0))
@@ -68,7 +69,7 @@ function Pathfinding() {
     prevRef.current.fill(-1)
     gScoreRef.current = new Float32Array(newSize)
     gScoreRef.current.fill(Infinity)
-    openRef.current = []
+    openRef.current = new MinHeap((n) => n.f)
     selectedAtRef.current = new Float64Array(newSize)
     doneRef.current = false
     pathRef.current = []
@@ -90,43 +91,8 @@ function Pathfinding() {
   useEffect(() => { recomputeGrid() }, [cellSize, recomputeGrid])
 
   const heuristic = useCallback((x, y) => Math.abs(x - end.x) + Math.abs(y - end.y), [end])
-  // Binary heap for open set (min-heap by f)
-  const heapSiftUp = useCallback((heap, idx) => {
-    let i = idx
-    while (i > 0) {
-      const parent = Math.floor((i - 1) / 2)
-      if (heap[parent].f <= heap[i].f) break
-      const tmp = heap[parent]
-      heap[parent] = heap[i]
-      heap[i] = tmp
-      i = parent
-    }
-  }, [])
-  const heapSiftDown = useCallback((heap, idx) => {
-    let i = idx
-    const n = heap.length
-    while (true) {
-      const l = i * 2 + 1
-      const r = l + 1
-      let smallest = i
-      if (l < n && heap[l].f < heap[smallest].f) smallest = l
-      if (r < n && heap[r].f < heap[smallest].f) smallest = r
-      if (smallest === i) break
-      const tmp = heap[i]
-      heap[i] = heap[smallest]
-      heap[smallest] = tmp
-      i = smallest
-    }
-  }, [])
-  const pushOpen = useCallback((n) => { openRef.current.push(n); heapSiftUp(openRef.current, openRef.current.length - 1) }, [heapSiftUp])
-  const popOpen = useCallback(() => {
-    const heap = openRef.current
-    if (heap.length === 0) return undefined
-    const top = heap[0]
-    const last = heap.pop()
-    if (heap.length > 0 && last) { heap[0] = last; heapSiftDown(heap, 0) }
-    return top
-  }, [heapSiftDown])
+  const pushOpen = useCallback((n) => { openRef.current.push(n) }, [])
+  const popOpen = useCallback(() => openRef.current.pop(), [])
   const neighbors = useCallback((x, y) => get4Neighbors(x, y, cols, rows), [cols, rows])
 
   const resetSearch = useCallback(() => {
@@ -137,7 +103,7 @@ function Pathfinding() {
     prevRef.current.fill(-1)
     gScoreRef.current = new Float32Array(size)
     gScoreRef.current.fill(Infinity)
-    openRef.current = []
+    openRef.current = new MinHeap((n) => n.f)
     doneRef.current = false
     pathRef.current = []
     pathPosRef.current = new Int32Array(size)
@@ -153,8 +119,6 @@ function Pathfinding() {
     const h0 = heuristic(s.x, s.y)
     const f0 = algo === 'astar' ? h0 : (algo === 'greedy' ? h0 : 0)
     pushOpen({ x: s.x, y: s.y, g: 0, f: f0 })
-    visitedRef.current[si] = 1
-    visitedAtRef.current[si] = performance.now()
     gScoreRef.current[si] = 0
     setIsRunning(true)
     lastStepAt.current = performance.now()
@@ -165,6 +129,11 @@ function Pathfinding() {
     const cur = popOpen()
     if (!cur) { doneRef.current = true; setIsRunning(false); return }
     const ci = index(cur.x, cur.y)
+    // Skip walls
+    if (grid[ci] === 1) { return }
+    // Mark visited on pop
+    visitedRef.current[ci] = 1
+    visitedAtRef.current[ci] = performance.now()
     if (cur.x === end.x && cur.y === end.y) {
       const endIdx = index(end.x, end.y)
       const path = []
@@ -194,8 +163,6 @@ function Pathfinding() {
     for (const n of neighbors(cur.x, cur.y)) {
       const ni = index(n.x, n.y)
       if (visitedRef.current[ni] === 0 && grid[ni] !== 1) {
-        visitedRef.current[ni] = 1
-        visitedAtRef.current[ni] = performance.now()
         prevRef.current[ni] = ci
         const g = cur.g + 1
         gScoreRef.current[ni] = g
@@ -438,7 +405,7 @@ function Pathfinding() {
 
   // Controls
   const clearWalls = () => { setGrid(new Uint8Array(cols * rows)); resetSearch() }
-  const startPause = () => { if (isRunning) { setIsRunning(false) } else if (openRef.current.length === 0 && !doneRef.current) { startSearch() } else { setIsRunning(true) } }
+  const startPause = () => { if (isRunning) { setIsRunning(false) } else if (openRef.current.size === 0 && !doneRef.current) { startSearch() } else { setIsRunning(true) } }
 
   const controls = (
     <>
