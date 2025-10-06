@@ -1,47 +1,16 @@
 import React from 'react'
 import CellularAutomaton from './CellularAutomaton'
+import { initRule30, stepRule30 } from '../lib/automata/rule30'
 
 function Rule30() {
-  // Custom step function for Rule 30 (1D cellular automaton)
-  const stepFunction = (grid, cols, rows, customState, setCustomState, wrapEdges, index) => {
-    const newGrid = new Uint8Array(cols * rows)
-    
-    // Rule 30: 01111000 in binary
-    // This creates a chaotic pattern from a simple rule
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        let left, center, right
-        
-        if (wrapEdges) {
-          left = grid[index((x - 1 + cols) % cols, y)]
-          center = grid[index(x, y)]
-          right = grid[index((x + 1) % cols, y)]
-        } else {
-          left = x > 0 ? grid[index(x - 1, y)] : 0
-          center = grid[index(x, y)]
-          right = x < cols - 1 ? grid[index(x + 1, y)] : 0
-        }
-        
-        // Apply Rule 30
-        const pattern = (left << 2) | (center << 1) | right
-        const newState = (30 >> pattern) & 1
-        newGrid[index(x, y)] = newState
-      }
-    }
-    
+  // Custom step function for Rule 30 using lib
+  const stepFunction = (grid, cols, rows, customState, setCustomState, wrapEdges) => {
+    const newGrid = stepRule30(grid, cols, rows, wrapEdges)
     return { grid: newGrid }
   }
 
   // Custom initial state setup - single cell in the middle of the first row
-  const initialState = (cols, rows, grid) => {
-    const newGrid = new Uint8Array(cols * rows)
-    // Set the middle cell of the first row to alive
-    if (cols > 0 && rows > 0) {
-      const centerX = Math.floor(cols / 2)
-      newGrid[centerX] = 1 // First row, so y = 0, index = y * cols + x = 0 * cols + x = x
-    }
-    return { grid: newGrid }
-  }
+  const initialState = (cols, rows) => ({ grid: initRule30(cols, rows) })
 
   // Custom drawing function for Rule 30
   const customDraw = (ctx, canvas, grid, cols, rows, cellSize, showGrid, index, customState) => {

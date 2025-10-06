@@ -1,58 +1,17 @@
 import React from 'react'
 import CellularAutomaton from './CellularAutomaton'
+import { initLangtonsAnt, stepLangtonsAnt } from '../lib/automata/langtonsAnt'
 
 function LangtonsAnt() {
-  // Custom step function for Langton's Ant
-  const stepFunction = (grid, cols, rows, customState, setCustomState, wrapEdges, index) => {
-    const { antX, antY, direction } = customState
-    if (cols === 0 || rows === 0) return null
-    
-    const i = index(antX, antY)
-    const current = grid[i] // 0 = white, 1 = black
-
-    // Turn: white=right, black=left
-    const newDir = current === 0 ? (direction + 1) % 4 : (direction + 3) % 4
-
-    // Flip the color
-    const newGrid = new Uint8Array(grid)
-    newGrid[i] = current === 0 ? 1 : 0
-
-    // Move forward
-    let nx = antX
-    let ny = antY
-    if (newDir === 0) ny -= 1
-    else if (newDir === 1) nx += 1
-    else if (newDir === 2) ny += 1
-    else if (newDir === 3) nx -= 1
-
-    if (wrapEdges) {
-      if (nx < 0) nx = cols - 1
-      else if (nx >= cols) nx = 0
-      if (ny < 0) ny = rows - 1
-      else if (ny >= rows) ny = 0
-    } else {
-      // clamp to edges
-      nx = Math.max(0, Math.min(cols - 1, nx))
-      ny = Math.max(0, Math.min(rows - 1, ny))
-    }
-
-    // Update custom state
-    setCustomState(prev => ({
-      ...prev,
-      antX: nx,
-      antY: ny,
-      direction: newDir
-    }))
-
+  // Custom step function for Langton's Ant using lib
+  const stepFunction = (grid, cols, rows, customState, setCustomState, wrapEdges) => {
+    const { grid: newGrid, state } = stepLangtonsAnt(grid, cols, rows, customState, wrapEdges)
+    setCustomState(state)
     return { grid: newGrid }
   }
 
   // Custom initial state setup
-  const initialState = (cols, rows, grid) => ({
-    antX: Math.floor(cols / 2),
-    antY: Math.floor(rows / 2),
-    direction: 0 // 0=up, 1=right, 2=down, 3=left
-  })
+  const initialState = (cols, rows) => initLangtonsAnt(cols, rows)
 
   // Custom drawing function for Langton's Ant
   const customDraw = (ctx, canvas, grid, cols, rows, cellSize, showGrid, index, customState) => {

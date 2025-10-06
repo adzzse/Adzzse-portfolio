@@ -72,5 +72,3 @@ export function reconstructPath(prev, endIdx) {
   path.reverse()
   return path
 }
-
-
