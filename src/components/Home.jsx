@@ -18,6 +18,10 @@ function Home() {
             <h3>Highlife →</h3>
             <p>B36/S23 cellular automaton.</p>
           </Link>
+          <Link className="card" to="/pathfinding">
+            <h3>Pathfinding →</h3>
+            <p>Dijkstra, A*, and GBFS visualization.</p>
+          </Link>
           <Link className="card" to="/langtonsant">
             <h3>Langton's Ant →</h3>
             <p>Simple rules, complex behavior - a 2D Turing machine.</p>
