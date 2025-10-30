@@ -16,7 +16,6 @@ function Header() {
   
   const isActive = (path) => location.pathname === path
   
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -102,6 +101,7 @@ function Header() {
               </Link>
             </div>
           </div>
+          <Link to="/about" className={isActive('/about') ? 'active' : ''} onClick={closeDropdown} style={{marginLeft: '12px', padding: '8px 12px', borderRadius: '8px', textDecoration: 'none', color: 'inherit'}}>About</Link>
         </nav>
       </div>
     </header>

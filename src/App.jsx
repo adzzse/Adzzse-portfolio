@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Home from './components/Home'
+import About from './components/About'
 import GameOfLife from './components/GameOfLife'
 import Highlife from './components/Highlife'
 // import Weather from './components/Weather'
@@ -26,6 +27,7 @@ function App() {
       <Route path="/rule30" element={<Rule30 />} />
       <Route path="/calculator" element={<Calculator />} />
       <Route path="/pathfinding" element={<Pathfinding />} />
+      <Route path="/about" element={<About />} />
     </Routes>
   ), [])
 
