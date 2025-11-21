@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Grid } from './widgets/Grid'
+import { Grid } from './widgets/Background'
 import { Socials } from './widgets/Socials'
 import { Birthday } from './widgets/Birthday'
 import { Tools } from './widgets/Tools'
@@ -124,12 +124,11 @@ export default function About() {
       <title>About - Adzzse</title>
       <Grid />
       <div
-        className={`relative z-10 flex w-full max-w-4xl flex-col gap-2 transition-opacity duration-500 lg:flex-row lg:items-stretch ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`relative z-10 flex w-full max-w-4xl flex-col gap-2 transition-opacity duration-500 lg:flex-row lg:items-stretch ${isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
       >
         <div className="flex w-full flex-col gap-2 lg:w-1/2">
-          <div className="rounded-[10px] bg-black ring-2 ring-white/10">
+          <div className="cursor-target rounded-[10px] bg-white dark:bg-black ring-2 ring-black/10 dark:ring-white/10">
             <div className="flex items-start gap-4 p-6">
               <div className="relative h-20 w-20 shrink-0">
                 {avatarUrl && (
@@ -147,26 +146,26 @@ export default function About() {
               </div>
 
               <div className="pt-1 text-left">
-                <h1 className="mb-0 text-xl font-semibold text-white">
+                <h1 className="mb-0 text-xl font-semibold text-gray-900 dark:text-white">
                   Adzzse
                   {presence?.discord_user?.username && (
-                    <span className="text-xs text-white/40 ml-2 font-normal">
+                    <span className="text-xs text-gray-500 dark:text-white/40 ml-2 font-normal">
                       {presence.discord_user.username}
                     </span>
                   )}
                 </h1>
                 <div className="mt-1 h-1 w-10 bg-[#4682b4]" />
-                <p className="mt-2 text-sm text-white/60">
+                <p className="mt-2 text-sm text-gray-600 dark:text-white/60">
                   {age} y/o Backend Developer(I think so).
                 </p>
               </div>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <div className="col-span-1 flex justify-center rounded-[10px] bg-black p-3 text-left ring-2 ring-white/10">
+            <div className="cursor-target col-span-1 flex justify-center rounded-[10px] bg-white dark:bg-black p-3 text-left ring-2 ring-black/10 dark:ring-white/10">
               <div>
-                <p className="text-xs text-white/60">It is</p>
-                <p className="text-lg font-semibold text-white">{time}</p>
+                <p className="text-xs text-gray-600 dark:text-white/60">It is</p>
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">{time}</p>
               </div>
             </div>
             <Birthday />
