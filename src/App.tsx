@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
 import { FaHome, FaMapSigns, FaGithub } from 'react-icons/fa'
-import About from './components/About'
 import TargetCursor from './components/widgets/Cursor'
 import { ThemeToggle } from './components/widgets/ThemeToggle'
 import Dock from './components/widgets/Dock'
-import PathfindingVisualizer from './features/pathfinding/components/PathfindingVisualizer'
+
+const About = React.lazy(() => import('./components/About'))
+const PathfindingVisualizer = React.lazy(() => import('./features/pathfinding/components/PathfindingVisualizer'))
 
 function App(): JSX.Element {
   const navigate = useNavigate()
@@ -21,11 +22,11 @@ function App(): JSX.Element {
       label: 'Pathfinding',
       onClick: () => navigate('/pathfinding'),
     },
-    // {
-    //   icon: <FaGithub size={18} className="text-gray-700 dark:text-gray-200" />,
-    //   label: 'GitHub',
-    //   onClick: () => window.open('https://github.com/adzzse', '_blank'),
-    // },
+    {
+      icon: <FaGithub size={18} className="text-gray-700 dark:text-gray-200" />,
+      label: 'GitHub',
+      onClick: () => window.open('https://github.com/adzzse', '_blank'),
+    },
   ]
 
   return (
@@ -33,10 +34,12 @@ function App(): JSX.Element {
       <TargetCursor />
       <ThemeToggle />
       <main>
-        <Routes>
-          <Route path="/" element={<About />} />
-          <Route path="/pathfinding" element={<PathfindingVisualizer />} />
-        </Routes>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<About />} />
+            <Route path="/pathfinding" element={<PathfindingVisualizer />} />
+          </Routes>
+        </Suspense>
       </main>
       
       <div className="fixed bottom-4 left-0 right-0 flex justify-center z-50 pointer-events-none">
