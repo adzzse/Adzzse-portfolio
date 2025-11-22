@@ -90,7 +90,8 @@ export function ThemeToggle({ duration = 400 }: ThemeToggleProps = {}) {
         overlay.style.inset = '0'
         overlay.style.zIndex = '9999'
         overlay.style.pointerEvents = 'none'
-        overlay.style.background = isDark ? 'rgba(241, 245, 249, 0.1)' : 'rgba(15, 23, 42, 0.1)'
+        // Increased opacity for better visibility
+        overlay.style.background = isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'
         document.body.appendChild(overlay)
 
         setTimeout(() => {
@@ -103,13 +104,13 @@ export function ThemeToggle({ duration = 400 }: ThemeToggleProps = {}) {
                     opacity: [1, 0],
                 },
                 {
-                    duration: duration * 0.8,
+                    duration: duration * 1.5, // Slower animation
                     easing: 'ease-out',
                 }
             ).onfinish = () => {
                 overlay.remove()
             }
-        }, duration * 0.15)
+        }, duration * 0.3) // Increased delay
     }, [isDark, duration])
 
     return (
@@ -121,7 +122,7 @@ export function ThemeToggle({ duration = 400 }: ThemeToggleProps = {}) {
         >
             {/* sun icon */}
             <svg
-                className={`absolute h-10 w-10 fill-current text-gray-900 dark:text-white transition-all duration-300 ${isDark ? 'rotate-180 opacity-0 scale-0' : 'rotate-0 opacity-100 scale-100'
+                className={`absolute h-10 w-10 fill-current text-[var(--text)] transition-all duration-300 ${isDark ? 'rotate-180 opacity-0 scale-0' : 'rotate-0 opacity-100 scale-100'
                     }`}
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -131,7 +132,7 @@ export function ThemeToggle({ duration = 400 }: ThemeToggleProps = {}) {
 
             {/* moon icon */}
             <svg
-                className={`absolute h-10 w-10 fill-current text-gray-900 dark:text-white transition-all duration-300 ${isDark ? 'rotate-0 opacity-100 scale-100' : '-rotate-180 opacity-0 scale-0'
+                className={`absolute h-10 w-10 fill-current text-[var(--text)] transition-all duration-300 ${isDark ? 'rotate-0 opacity-100 scale-100' : '-rotate-180 opacity-0 scale-0'
                     }`}
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"

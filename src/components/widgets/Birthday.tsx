@@ -21,9 +21,9 @@ export function Birthday() {
   }, [])
 
   return (
-    <div className="cursor-target col-span-1 flex justify-center rounded-[10px] bg-white dark:bg-black p-3 text-left ring-2 ring-black/10 dark:ring-white/10">
+    <div className="cursor-target col-span-1 flex justify-center rounded-[10px] bg-white dark:bg-black p-3 text-left ring-1 ring-gray-200 dark:ring-white/10">
       <div>
-        <p className="text-xs text-gray-600 dark:text-white/60">Cake in</p>
+        <p className="text-xs text-gray-500 dark:text-white/60">Cake in</p>
         <p className="text-lg font-semibold text-gray-900 dark:text-white">{days} days</p>
       </div>
     </div>

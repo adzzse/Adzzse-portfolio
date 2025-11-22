@@ -7,15 +7,15 @@ interface SocialsProps {
 
 export function Socials({ discordId }: SocialsProps) {
   return (
-    <div className="cursor-target col-span-1 flex justify-center rounded-[10px] bg-white dark:bg-black p-3 text-left ring-2 ring-black/10 dark:ring-white/10">
+    <div className="cursor-target col-span-1 flex justify-center rounded-[10px] bg-white dark:bg-black p-3 text-left ring-1 ring-gray-200 dark:ring-white/10">
       <div>
-        <p className="text-xs text-gray-600 dark:text-white/60">Contact me</p>
+        <p className="text-xs text-gray-500 dark:text-white/60">Contact me</p>
         <div className="flex items-center gap-2 mt-2">
           <a
             href="https://github.com/adzzse"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-600 dark:text-white/60 transition-colors duration-200 hover:text-gray-900 dark:hover:text-white"
+            className="text-gray-500 dark:text-white/60 transition-colors duration-200 hover:text-gray-900 dark:hover:text-white"
             aria-label="GitHub Profile"
           >
             <TbBrandGithub className="h-5 w-5" />

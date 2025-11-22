@@ -120,7 +120,7 @@ export default function About() {
   const statusColor = statusColors[status]
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center p-6">
+    <main className="about-main relative flex min-h-screen items-center justify-center p-6">
       <title>About - Adzzse</title>
       <Grid />
       <div
@@ -128,7 +128,7 @@ export default function About() {
           }`}
       >
         <div className="flex w-full flex-col gap-2 lg:w-1/2">
-          <div className="cursor-target rounded-[10px] bg-white dark:bg-black ring-2 ring-black/10 dark:ring-white/10">
+          <div className="cursor-target rounded-[10px] bg-white dark:bg-black ring-1 ring-gray-200 dark:ring-white/10">
             <div className="flex items-start gap-4 p-6">
               <div className="relative h-20 w-20 shrink-0">
                 {avatarUrl && (
@@ -140,7 +140,7 @@ export default function About() {
                 )}
                 <span
                   title={status}
-                  className="absolute -bottom-1 -right-1 block h-5 w-5 rounded-full border-3 border-black"
+                  className="absolute -bottom-1 -right-1 block h-5 w-5 rounded-full border-3 border-white dark:border-black"
                   style={{ backgroundColor: statusColor }}
                 />
               </div>
@@ -155,16 +155,16 @@ export default function About() {
                   )}
                 </h1>
                 <div className="mt-1 h-1 w-10 bg-[#4682b4]" />
-                <p className="mt-2 text-sm text-gray-600 dark:text-white/60">
+                <p className="mt-2 text-sm text-gray-500 dark:text-white/60">
                   {age} y/o Backend Developer(I think so).
                 </p>
               </div>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <div className="cursor-target col-span-1 flex justify-center rounded-[10px] bg-white dark:bg-black p-3 text-left ring-2 ring-black/10 dark:ring-white/10">
+            <div className="cursor-target col-span-1 flex justify-center rounded-[10px] bg-white dark:bg-black p-3 text-left ring-1 ring-gray-200 dark:ring-white/10">
               <div>
-                <p className="text-xs text-gray-600 dark:text-white/60">It is</p>
+                <p className="text-xs text-gray-500 dark:text-white/60">It is</p>
                 <p className="text-lg font-semibold text-gray-900 dark:text-white">{time}</p>
               </div>
             </div>

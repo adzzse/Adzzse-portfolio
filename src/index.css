@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@config "../tailwind.config.js";
 
 :root {
   --bg-soft: #121936;
@@ -44,15 +45,17 @@ body {
   background: #f1f5f9;
 }
 
-
-
 /* About Page Styles */
 .about-main {
   min-height: 100vh;
-  background: linear-gradient(180deg, #101625 0%, #141a2a 50%, #0f172a 100%);
+  background: #f1f5f9;
   padding: 24px 8px 60px 8px;
   position: relative;
   overflow: hidden;
+}
+
+.dark .about-main {
+  background: linear-gradient(180deg, #101625 0%, #141a2a 50%, #0f172a 100%);
 }
 
 .about-bg-grid {
@@ -60,11 +63,15 @@ body {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: repeating-linear-gradient(rgba(60, 60, 60, 0.045) 0 1px,
-      transparent 1px 40px),
-    repeating-linear-gradient(90deg,
+  background: repeating-linear-gradient(
       rgba(60, 60, 60, 0.045) 0 1px,
-      transparent 1px 40px);
+      transparent 1px 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(60, 60, 60, 0.045) 0 1px,
+      transparent 1px 40px
+    );
 }
 
 .about-bg-glow {
@@ -96,13 +103,13 @@ body {
 .about-title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #e8edf7;
+  color: var(--text);
   margin-bottom: 0.25rem;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .about-subtitle {
-  color: #b7c0d6;
+  color: var(--muted);
   margin-top: 0.5rem;
   font-size: 1.1rem;
 }
@@ -139,7 +146,7 @@ body {
   height: 30px;
   border-radius: 50%;
   pointer-events: none;
-  border: 3px solid #6ee7ff;
+  border: 3px solid var(--accent);
   background: transparent;
   box-shadow: none;
 }

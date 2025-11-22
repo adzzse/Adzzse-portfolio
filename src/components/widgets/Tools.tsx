@@ -18,7 +18,7 @@ import {
 
 const tools = [
   { icon: RiJavaLine, color: '#f89820' },
-  { icon: TbBrandNextjs, color: '#FFFFFF' },
+  { icon: TbBrandNextjs, color: 'var(--text)' }, // Use CSS variable for theme adaptation
   { icon: TbBrandReact, color: '#61DAFB' },
   { icon: TbBrandTailwind, color: '#06B6D4' },
   { icon: TbBrandJavascript, color: '#f7df1e' },
@@ -30,7 +30,7 @@ const tools = [
 
 export function Tools() {
   return (
-    <div className="cursor-target col-span-3 grid grid-cols-9 gap-2 rounded-[10px] bg-white dark:bg-black p-3 text-left ring-2 ring-black/10 dark:ring-white/10">
+    <div className="cursor-target col-span-3 grid grid-cols-9 gap-2 rounded-[10px] bg-white dark:bg-black p-3 text-left ring-1 ring-gray-200 dark:ring-white/10">
       {tools.map((tool, index) => {
         const Icon = tool.icon
         return (
