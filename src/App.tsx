@@ -12,24 +12,24 @@ function App(): JSX.Element {
 
   const items = [
     {
-      icon: <FaHome size={18} className="text-white" />,
+      icon: <FaHome size={18} className="text-gray-700 dark:text-gray-200" />,
       label: 'Home',
       onClick: () => navigate('/'),
     },
     {
-      icon: <FaMapSigns size={18} className="text-white" />,
+      icon: <FaMapSigns size={18} className="text-gray-700 dark:text-gray-200" />,
       label: 'Pathfinding',
       onClick: () => navigate('/pathfinding'),
     },
-    {
-      icon: <FaGithub size={18} className="text-white" />,
-      label: 'GitHub',
-      onClick: () => window.open('https://github.com/adzzse', '_blank'),
-    },
+    // {
+    //   icon: <FaGithub size={18} className="text-gray-700 dark:text-gray-200" />,
+    //   label: 'GitHub',
+    //   onClick: () => window.open('https://github.com/adzzse', '_blank'),
+    // },
   ]
 
   return (
-    <div className="App relative min-h-screen pb-24">
+    <div className="App relative min-h-screen">
       <TargetCursor />
       <ThemeToggle />
       <main>
